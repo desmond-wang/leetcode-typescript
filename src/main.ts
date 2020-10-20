@@ -1,11 +1,12 @@
-import _ from 'lodash'
+import _ from 'lodash';
 
 export class ListNode {
-    val: number
-    next: ListNode | null
+    val: number;
+    next: ListNode | null;
+
     constructor(val?: number, next?: ListNode | null) {
-        this.val = (val === undefined ? 0 : val)
-        this.next = (next === undefined ? null : next)
+        this.val = val === undefined ? 0 : val;
+        this.next = next === undefined ? null : next;
     }
 }
 
@@ -18,9 +19,11 @@ export function findMinArrowShots(points: number[][]): number {
 
     function munch(points: number[][], i: number) {
         function intersect(itvl1: number[], itvl2: number[]): [boolean, number[]] {
-            const start = Math.max(itvl1[0], itvl2[0]), end = Math.min(itvl1[1], itvl2[1]);
+            const start = Math.max(itvl1[0], itvl2[0]),
+                end = Math.min(itvl1[1], itvl2[1]);
             return [end >= start, [start, end]];
         }
+
         let itvl = points[i];
         while (i < points.length) {
             const currItvl = points[i];
@@ -43,16 +46,19 @@ export function findMinArrowShots(points: number[][]): number {
     }
 
     return k;
-};
+}
 
 export function removeDuplicateLetters(s: string): string {
     function getFirstPosition(chars: string[]): number {
         const last = new Map<string, number>();
-        chars.slice().reverse().forEach((char, index) => {
-            if (!last.has(char)) {
-                last.set(char, chars.length - 1 - index);
-            }
-        })
+        chars
+            .slice()
+            .reverse()
+            .forEach((char, index) => {
+                if (!last.has(char)) {
+                    last.set(char, chars.length - 1 - index);
+                }
+            });
         let result = chars[0];
         let resultIndex = 0;
         let minLeftLast = last.get(result)!;
@@ -75,10 +81,9 @@ export function removeDuplicateLetters(s: string): string {
         const firstChar = chars[firstPosition];
         result.push(firstChar);
         chars = chars.slice(firstPosition).filter((char) => char !== firstChar);
-
     }
     return result.join('');
-};
+}
 
 export function buddyStrings(A: string, B: string): boolean {
     const pairs = _.zip([...A], [...B]).filter(([a, b]) => a !== b);
@@ -86,7 +91,7 @@ export function buddyStrings(A: string, B: string): boolean {
         return pairs[0][0] === pairs[1][1] && pairs[0][1] === pairs[1][0];
     }
     return pairs.length === 0 && _.uniq([...A]).length !== A.length;
-};
+}
 
 export function sortList(head: ListNode | null): ListNode | null {
     if (head === null) {
@@ -133,7 +138,7 @@ export function sortList(head: ListNode | null): ListNode | null {
     leftTail.next = null;
 
     return merge(sortList(head)!, sortList(rightHead)!);
-};
+}
 
 export function rob(nums: number[]): number {
     function linearRob(nums: number[]): number {
@@ -149,6 +154,7 @@ export function rob(nums: number[]): number {
         }
         return 0;
     }
+
     if (nums.length === 1) {
         return nums[0];
     }
@@ -157,12 +163,12 @@ export function rob(nums: number[]): number {
     const copy2 = nums.slice();
     copy2.pop();
     return Math.max(linearRob(copy1), linearRob(copy2));
-};
+}
 
 export function rotate(nums: number[], k: number): void {
     function reverse(i: number, j: number) {
         for (let m = i; m < (i + j) / 2; ++m) {
-            [nums[m], nums[j - m + i]] = [nums[j - m + i], nums[m]]
+            [nums[m], nums[j - m + i]] = [nums[j - m + i], nums[m]];
         }
     }
 
@@ -170,4 +176,47 @@ export function rotate(nums: number[], k: number): void {
     const modN = k % nums.length;
     reverse(0, modN - 1);
     reverse(modN, nums.length - 1);
-};
+}
+
+export function searchMatrix(matrix: number[][], target: number): boolean {
+    if (matrix.length === 0) {
+        return false;
+    }
+    const firstColumn = matrix.map((row) => row[0]);
+    const rowPivot = _.sortedIndexBy(firstColumn, target);
+    let row = matrix[rowPivot];
+    row = row ?? matrix[0];
+
+    if (row[0] == target) {
+        return true;
+    }
+    if (rowPivot === 0) {
+        return false;
+    }
+    row = matrix[rowPivot - 1];
+    return _.sortedIndexOf(row, target) !== -1;
+}
+
+export function maxProfit(k: number, prices: number[]): number {
+    if (k === 0) return 0;
+    const n = prices.length;
+    k = Math.min(k * 2, n);
+    let sell = new Array(n).fill(0);
+    let buy = new Array(n).fill(0);
+    for (let K = 1; K <= k; ++K) {
+        let nextSell = sell.slice();
+        let nextBuy = buy.slice();
+        let maxHistorySell = 0;
+        let maxHistoryBuy = -prices[0];
+        for (let N = 1; N < n; ++N) {
+            const priceToday = prices[N];
+            nextBuy[N] = maxHistorySell - priceToday;
+            nextSell[N] = maxHistoryBuy + priceToday;
+            maxHistorySell = Math.max(maxHistorySell, sell[N], 0);
+            maxHistoryBuy = Math.max(maxHistoryBuy, buy[N]);
+        }
+        sell = nextSell;
+        buy = nextBuy;
+    }
+    return Math.max(..._.times(n, (i: number) => sell[i]), 0);
+}
